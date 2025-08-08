@@ -80,8 +80,8 @@ if uploaded_file:
             st.success("Fertig! Hier ist deine bereinigte Datei:")
             st.audio(output_path, format="audio/wav")
 
-            default_filename = uploaded_file.name.replace(".wav", "").replace(".mp3", "") + "_clean"
-            output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
+            #default_filename = uploaded_file.name.replace(".wav", "").replace(".mp3", "") + "_clean"
+            #output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
 
             with open(output_path, "rb") as f:
                 st.download_button(label="\:floppy_disk: Bereinigte Datei herunterladen", data=f, file_name=f"{output_filename}.wav")
