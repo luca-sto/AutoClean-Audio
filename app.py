@@ -31,16 +31,18 @@ preset = st.selectbox ("Noise Reduction Preset" , ["Custom", "(0.4) Light", "(0.
 if preset == "Custom":
     prop_decrease = st.slider ("Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05)
 
-volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value = 1.0, step = 0.05)
-
-if preset == "(0.4) Light":
+elif preset == "(0.4) Light":
     prop_decrease = 0.4
 
-if preset == "(0.7) Balanced":
+elif preset == "(0.7) Balanced":
     prop_decrease = 0.7
 
-if preset == "(1.0) Strong":
+elif preset == "(1.0) Strong":
     prop_decrease = 1.0
+
+volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value = 1.0, step = 0.05)
+
+number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
 
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
