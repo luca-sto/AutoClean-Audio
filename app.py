@@ -44,7 +44,7 @@ volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value 
 
 number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
 
-if number_of_passes > 2:
+if number_of_passes > 1:
     st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, können aber auch Sprachqualität und klangfarbe beeinträchtigen.")
 
 if uploaded_file:
@@ -63,11 +63,16 @@ if uploaded_file:
         noise_sample = y[0:int(0.33 * len(y))]
 
         # Rauschunterdrückung
-        #for i in range(number_of_passes):
+        reduced = y.copy()
+        progress_bar = st.progress(0)
+        for i in range(number_of_passes):
+            reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+            progress_bar.progress(int((i+1) / num_passes * 100))
 
-        reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+        reduced = reduced * volume_factor
 
-        reduced_noise = reduced_noise * volume_factor
+        #reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+        #reduced_noise = reduced_noise * volume_factor
 
         # Ausgabe speichern
         output_path = temp_path + "_clean.wav"
