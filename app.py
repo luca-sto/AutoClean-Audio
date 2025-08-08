@@ -44,6 +44,9 @@ volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value 
 
 number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
 
+if number_of_passes > 2:
+    st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, können aber auch Sprachqualität und klangfarbe beeinträchtigen.")
+
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
 
@@ -57,10 +60,13 @@ if uploaded_file:
         y, sr = librosa.load(temp_path, sr=None)
 
         # Rauschprofil (einfach: erstes Drittel)
-        noise_sample = y[0:int(0.25 * len(y))]
+        noise_sample = y[0:int(0.33 * len(y))]
 
-        # Rauschunterdrückung + Lautstärke
+        # Rauschunterdrückung
+        for i in range(number_of_passes):
+
         reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+
         reduced_noise = reduced_noise * volume_factor
 
         # Ausgabe speichern
