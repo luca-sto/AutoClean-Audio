@@ -84,4 +84,4 @@ if uploaded_file:
             output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
 
             with open(output_path, "rb") as f:
-                st.download_button(label="\{:floppy_disk:} Bereinigte Datei herunterladen", data=f, file_name=f"{output_filename}.wav")
+                st.download_button(label="\:floppy_disk: Bereinigte Datei herunterladen", data=f, file_name=f"{output_filename}.wav")
