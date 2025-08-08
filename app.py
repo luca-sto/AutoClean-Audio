@@ -28,7 +28,8 @@ uploaded_file = st.file_uploader("Lade eine Audiodatei hoch (.wav oder .mp3)", t
 
 preset = st.selectbox ("Noise Reduction Preset" , ["Custom", "Light", "Balanced", "Strong"])
 
-prop_decrease = st.slider ("Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05)
+if preset != "Custom":
+    prop_decrease = st.slider ("Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05)
 
 volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value = 1.0, step = 0.05)
 
