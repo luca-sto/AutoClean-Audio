@@ -76,7 +76,7 @@ if uploaded_file:
 
         # Ausgabe speichern
         output_path = temp_path + "_clean.wav"
-        sf.write(output_path, reduced_noise, sr)
+        sf.write(output_path, reduced, sr)
 
         st.success("Fertig! Hier ist deine bereinigte Datei:")
         st.audio(output_path, format="audio/wav")
