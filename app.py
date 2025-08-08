@@ -67,7 +67,7 @@ if uploaded_file:
         progress_bar = st.progress(0)
         for i in range(number_of_passes):
             reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-            progress_bar.progress(int((i+1) / num_passes * 100))
+            progress_bar.progress(int((i+1) / number_of_passes * 100))
 
         reduced = reduced * volume_factor
 
