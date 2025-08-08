@@ -23,3 +23,6 @@ Thumbs.db
 
 # VSCode project settings
 .vscode/
+
+# Ordner mit Testdateien
+Testdateien/

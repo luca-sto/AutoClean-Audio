@@ -5,7 +5,7 @@ import soundfile as sf
 import numpy as np
 import tempfile
 
-st.title("🎧 AutoClean Audio – Rauschfreie Sprachaufnahmen")
+st.title("🎧 AutoClean Audio – Rauschfreie Audioaufnahmen")
 
 with st.expander("ℹ️ Wie funktioniert AutoClean Audio?"):
     st.markdown("""
@@ -18,6 +18,9 @@ Es funktioniert so:
 
 📌 **Wichtig**: Wenn deine Sprache sehr leise oder das Rauschen sehr ähnlich zur Stimme ist, kann es zu Beeinträchtigungen kommen.  
 In einem späteren Update bieten wir zusätzliche **KI-gestützte Filtermethoden** für noch bessere Qualität.
+
+Gruß
+Luca
 """)
 
 
