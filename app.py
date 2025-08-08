@@ -50,35 +50,34 @@ if number_of_passes > 1:
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
 
-    with st.spinner("Verarbeite die Datei..."):
-        # Temporäre Datei schreiben
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(uploaded_file.read())
-            temp_path = temp_file.name
+    if st.button("Audio verarbeiten"):
 
-        # Audio laden
-        y, sr = librosa.load(temp_path, sr=None)
+        with st.spinner("Verarbeite die Datei..."):
+            # Temporäre Datei schreiben
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(uploaded_file.read())
+                temp_path = temp_file.name
 
-        # Rauschprofil (einfach: erstes Drittel)
-        noise_sample = y[0:int(0.33 * len(y))]
+            # Audio laden
+            y, sr = librosa.load(temp_path, sr=None)
 
-        # Rauschunterdrückung
-        reduced = y.copy()
-        progress_bar = st.progress(0)
-        for i in range(number_of_passes):
-            reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-            progress_bar.progress(int((i+1) / number_of_passes * 100))
+            # Rauschprofil (einfach: erstes Drittel)
+            noise_sample = y[0:int(0.33 * len(y))]
 
-        reduced = reduced * volume_factor
+            # Rauschunterdrückung
+            reduced = y.copy()
+            progress_bar = st.progress(0)
+            for i in range(number_of_passes):
+                reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+                progress_bar.progress(int((i+1) / number_of_passes * 100))
 
-        #reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-        #reduced_noise = reduced_noise * volume_factor
+            reduced = reduced * volume_factor
 
-        # Ausgabe speichern
-        output_path = temp_path + "_clean.wav"
-        sf.write(output_path, reduced, sr)
+            # Ausgabe speichern
+            output_path = temp_path + "_clean.wav"
+            sf.write(output_path, reduced, sr)
 
-        st.success("Fertig! Hier ist deine bereinigte Datei:")
-        st.audio(output_path, format="audio/wav")
-        with open(output_path, "rb") as f:
-            st.download_button(label="⬇️ Bereinigte Datei herunterladen", data=f, file_name="autoclean_output.wav")
+            st.success("Fertig! Hier ist deine bereinigte Datei:")
+            st.audio(output_path, format="audio/wav")
+            with open(output_path, "rb") as f:
+                st.download_button(label="⬇️ Bereinigte Datei herunterladen", data=f, file_name="autoclean_output.wav")
