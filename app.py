@@ -63,7 +63,7 @@ if uploaded_file:
         noise_sample = y[0:int(0.33 * len(y))]
 
         # Rauschunterdrückung
-        for i in range(number_of_passes):
+        #for i in range(number_of_passes):
 
         reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
 
