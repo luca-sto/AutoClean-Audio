@@ -1,5 +1,2 @@
 noisereduce
 librosa
-numpy
-soundfile
-tempfile
