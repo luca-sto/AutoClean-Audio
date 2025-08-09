@@ -5,8 +5,10 @@ import soundfile as sf
 import numpy as np
 import tempfile
 
+# Title of Web-App
 st.title("🎧 AutoClean Audio – Rauschfreie Audioaufnahmen")
 
+# expander to get description
 with st.expander("ℹ️ Wie funktioniert AutoClean Audio?"):
     st.markdown("""
 **AutoClean Audio** nutzt ein statistisches Modell zur Rauschunterdrückung.  
@@ -23,16 +25,19 @@ Gruß
 Luca
 """)
 
-
+# uploader
 uploaded_file = st.file_uploader(
     "Lade eine Audiodatei hoch", 
     type=["wav", "mp3", "flac", "ogg", "acc", "opus", "wma", "aiff", "m4a", "amr", "speex"]
 )
 
+# drop down to select noise reduction strength
 preset = st.selectbox ("Noise Reduction Preset" , ["(1.0) Strong", "(0.7) Balanced", "(0.4) Light", "Custom"])
 
 if preset == "Custom":
-    prop_decrease = st.slider ("Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05)
+    prop_decrease = st.slider (
+        "Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05
+    ) # to create slider, if custom is picked
 
 elif preset == "(0.4) Light":
     prop_decrease = 0.4
@@ -47,9 +52,11 @@ volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value 
 
 number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
 
+# warning for higher number_of_passes
 if number_of_passes > 1:
     st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, beeinträchtigen aber auch Sprachqualität und klangfarbe.")
 
+# uploaded file -> .wav   and set output_filename
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
 
@@ -64,22 +71,22 @@ if uploaded_file:
         "Ausgabeformat",
         ["wav", "mp3", "flac", "ogg", "aiff"]
     )
-
+    # button to start cleaning
     if st.button("Audio verarbeiten"):
 
         with st.spinner("Verarbeite die Datei..."):
-            # Temporäre Datei schreiben
+            # write temp data
             with tempfile.NamedTemporaryFile(delete=False, suffix=".tmp") as temp_file:
                 temp_file.write(uploaded_file.read())
                 temp_path = temp_file.name
 
-            # Audio laden
+            # load audio
             y, sr = librosa.load(temp_path, sr=None)
 
-            # Rauschprofil (einfach: erstes Drittel)
+            # nise-profile first 1/3
             noise_sample = y[0:int(0.33 * len(y))]
 
-            # Rauschunterdrückung
+            # noise reduction with number_of_passes
             reduced = y.copy()
             progress_bar = st.progress(0)
             for i in range(number_of_passes):
@@ -88,13 +95,14 @@ if uploaded_file:
 
             reduced = reduced * volume_factor
 
-            # Ausgabe speichern
+            # safe output
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}").name
             sf.write(output_path, reduced, sr, format=output_format.upper())
 
             st.success("Fertig! Hier ist deine bereinigte Datei:")
             st.audio(output_path, format="audio/{output_format}")
 
+            # download
             with open(output_path, "rb") as f:
                 st.download_button(
                     label="\:floppy_disk: Bereinigte Datei herunterladen",
