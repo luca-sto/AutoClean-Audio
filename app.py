@@ -24,7 +24,10 @@ Luca
 """)
 
 
-uploaded_file = st.file_uploader("Lade eine Audiodatei hoch (.wav oder .mp3)", type=["wav", "mp3"])
+uploaded_file = st.file_uploader(
+    "Lade eine Audiodatei hoch", 
+    type=["wav", "mp3", "flac", "ogg", "acc", "opus", "wma", "aiff", "m4a", "amr", "speex"]
+)
 
 preset = st.selectbox ("Noise Reduction Preset" , ["Custom", "(0.4) Light", "(0.7) Balanced", "(1.0) Strong"])
 
