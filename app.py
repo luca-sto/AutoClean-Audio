@@ -55,13 +55,16 @@ if number_of_passes > 1:
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
 
-    output_format = st.selectbox("Ausgabeformat", ["wav", "mp3", "flac"])
+    output_format = st.selectbox(
+        "Ausgabeformat",
+        ["wav", "mp3", "flac", "ogg", "aiff", "opus", "aac", "m4a"]
+    )
 
     if st.button("Audio verarbeiten"):
 
         with st.spinner("Verarbeite die Datei..."):
             # Temporäre Datei schreiben
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".tmp") as temp_file:
                 temp_file.write(uploaded_file.read())
                 temp_path = temp_file.name
 
@@ -81,14 +84,17 @@ if uploaded_file:
             reduced = reduced * volume_factor
 
             # Ausgabe speichern
-            output_path = temp_path + "_clean.wav"
-            sf.write(output_path, reduced, sr)
+            output_path = tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}").name
+            sf.write(output_path, reduced, sr, format=output_format.upper())
 
             st.success("Fertig! Hier ist deine bereinigte Datei:")
-            st.audio(output_path, format="audio/wav")
+            st.audio(output_path, format="audio/{output_format}")
 
             #default_filename = uploaded_file.name.replace(".wav", "").replace(".mp3", "") + "_clean"
             #output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
 
             with open(output_path, "rb") as f:
-                st.download_button(label="\:floppy_disk: Bereinigte Datei herunterladen", data=f, file_name=f"output.wav")
+                st.download_button(
+                    label="\:floppy_disk: Bereinigte Datei herunterladen",
+                    data=f,
+                    file_name=f"output.{output_format}")
