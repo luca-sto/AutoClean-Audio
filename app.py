@@ -6,7 +6,7 @@ import numpy as np
 import tempfile
 
 # Title of Web-App
-st.title("🎧 AutoClean Audio – Rauschfreie Audioaufnahmen")
+st.title("🎧 AutoClean Audio – Rauschunterdrückung für Audioaufnahmen")
 
 # expander to get description
 with st.expander("ℹ️ Wie funktioniert AutoClean Audio?"):
