@@ -31,10 +31,12 @@ uploaded_file = st.file_uploader(
     type=["wav", "mp3", "flac", "ogg", "acc", "opus", "wma", "aiff", "m4a", "amr", "speex"]
 )
 
+
+prop_decrease = 0.85
 # drop down to select noise reduction strength
 preset = st.selectbox ("Noise Reduction Preset" , ["(1.0) Strong", "(0.7) Balanced", "(0.4) Light", "Custom"])
 
-prop_decrease = 0.85
+
 
 if preset == "Custom":
     prop_decrease = st.slider (
