@@ -29,7 +29,7 @@ uploaded_file = st.file_uploader(
     type=["wav", "mp3", "flac", "ogg", "acc", "opus", "wma", "aiff", "m4a", "amr", "speex"]
 )
 
-preset = st.selectbox ("Noise Reduction Preset" , ["Custom", "(0.4) Light", "(0.7) Balanced", "(1.0) Strong"])
+preset = st.selectbox ("Noise Reduction Preset" , ["(1.0) Strong", "(0.7) Balanced", "(0.4) Light", "Custom"])
 
 if preset == "Custom":
     prop_decrease = st.slider ("Noise Reduction Strength", min_value=0.0, max_value=1.0, value = 0.85, step = 0.05)
@@ -49,8 +49,6 @@ number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value
 
 if number_of_passes > 1:
     st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, beeinträchtigen aber auch Sprachqualität und klangfarbe.")
-
-
 
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
@@ -96,8 +94,6 @@ if uploaded_file:
 
             st.success("Fertig! Hier ist deine bereinigte Datei:")
             st.audio(output_path, format="audio/{output_format}")
-
-            
 
             with open(output_path, "rb") as f:
                 st.download_button(
