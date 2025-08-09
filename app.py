@@ -50,8 +50,12 @@ number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value
 if number_of_passes > 1:
     st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, können aber auch Sprachqualität und klangfarbe beeinträchtigen.")
 
+
+
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
+
+    output_format = st.selectbox("Ausgabeformat", ["wav", "mp3", "flac"])
 
     if st.button("Audio verarbeiten"):
 
