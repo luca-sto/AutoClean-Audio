@@ -103,4 +103,4 @@ if uploaded_file:
                 st.download_button(
                     label="\:floppy_disk: Bereinigte Datei herunterladen",
                     data=f,
-                    file_name=f"output.{output_format}")
+                    file_name=f"{output_filename}.{output_format}")
