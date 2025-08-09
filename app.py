@@ -58,7 +58,7 @@ if uploaded_file:
     default_filename = uploaded_file.name
     for s in [".wav", ".mp3", ".flac", ".ogg", ".acc", ".opus", ".wma", ".aiff", ".m4a", ".amr", ".speex"]:
         if default_filename.endswith(s):
-            default_filename = default_filename.removesuffix(s)
+            default_filename = default_filename.removesuffix(s) + "_clean"
             break
     output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
 
