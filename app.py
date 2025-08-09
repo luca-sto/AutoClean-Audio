@@ -58,7 +58,7 @@ if uploaded_file:
     default_filename = uploaded_file.name
     for s in [".wav", ".mp3", ".flac", ".ogg", ".acc", ".opus", ".wma", ".aiff", ".m4a", ".amr", ".speex"]:
         if default_filename.endswith(s):
-            default_filename = default_filename.removesuffix(s) + "_clean"
+            default_filename = default_filename.removesuffix(s) + "_cleaned"
             break
     output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
 
@@ -103,4 +103,4 @@ if uploaded_file:
                 st.download_button(
                     label="\:floppy_disk: Bereinigte Datei herunterladen",
                     data=f,
-                    file_name=f"{output_filename}_clean.{output_format}")
+                    file_name=f"{output_filename}_cleaned.{output_format}")
