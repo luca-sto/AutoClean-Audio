@@ -34,9 +34,11 @@ uploaded_file = st.file_uploader(
 # drop down to select noise reduction strength
 preset = st.selectbox ("Noise Reduction Preset" , ["(1.0) Strong", "(0.7) Balanced", "(0.4) Light", "Custom"])
 
+prop_decrease = 0.85
+
 if preset == "Custom":
     prop_decrease = st.slider (
-        "Noise Reduction Strength", min_value=0.0, max_value=1.0, prop_decrease, step = 0.05
+        "Noise Reduction Strength", min_value=0.0, max_value=1.0, value = prop_decrease, step = 0.05
     ) # to create slider, if custom is picked
 
 elif preset == "(0.4) Light":
