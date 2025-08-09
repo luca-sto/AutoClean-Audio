@@ -48,7 +48,7 @@ volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value 
 number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
 
 if number_of_passes > 1:
-    st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, können aber auch Sprachqualität und klangfarbe beeinträchtigen.")
+    st.warning("Mehrere Durchläufe können Restrauschen weiter reduzieren, beeinträchtigen aber auch Sprachqualität und klangfarbe.")
 
 
 
@@ -103,4 +103,4 @@ if uploaded_file:
                 st.download_button(
                     label="\:floppy_disk: Bereinigte Datei herunterladen",
                     data=f,
-                    file_name=f"{output_filename}_cleaned.{output_format}")
+                    file_name=f"{output_filename}.{output_format}")
