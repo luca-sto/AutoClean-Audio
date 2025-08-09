@@ -87,9 +87,8 @@ if uploaded_file:
             for i in range(number_of_passes):
                 reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
                 progress_bar.progress(int((i+1) / number_of_passes * 100))
-                reduced = reduced * volume_factor
 
-            
+            reduced = reduced * volume_factor
 
             # Ausgabe speichern
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}").name
