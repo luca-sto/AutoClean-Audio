@@ -55,6 +55,13 @@ if number_of_passes > 1:
 if uploaded_file:
     st.audio(uploaded_file, format="audio/wav")
 
+    default_filename = uploaded_file.name
+    for s in [".wav", ".mp3", ".flac", ".ogg", ".acc", ".opus", ".wma", ".aiff", ".m4a", ".amr", ".speex"]:
+        if default_filename.endswith(s):
+            default_filename = default_filename.removesuffix(s)
+            break
+    output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
+
     output_format = st.selectbox(
         "Ausgabeformat",
         ["wav", "mp3", "flac", "ogg", "aiff", "opus", "aac", "m4a"]
@@ -90,8 +97,7 @@ if uploaded_file:
             st.success("Fertig! Hier ist deine bereinigte Datei:")
             st.audio(output_path, format="audio/{output_format}")
 
-            #default_filename = uploaded_file.name.replace(".wav", "").replace(".mp3", "") + "_clean"
-            #output_filename = st.text_input("Dateiname für die bereinigte Datei (ohne Endung):", value=default_filename)
+            
 
             with open(output_path, "rb") as f:
                 st.download_button(
