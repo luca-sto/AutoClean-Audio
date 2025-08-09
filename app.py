@@ -64,7 +64,7 @@ if uploaded_file:
 
     output_format = st.selectbox(
         "Ausgabeformat",
-        ["wav", "mp3", "flac", "ogg", "aiff", "opus", "aac", "m4a"]
+        ["wav", "mp3", "flac", "ogg", "aiff"]
     )
 
     if st.button("Audio verarbeiten"):
