@@ -50,7 +50,7 @@ elif preset == "(1.0) Strong":
 
 volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value = 1.0, step = 0.05)
 
-number_of_passes = st.slider("Durchlauf Anzahl", min_value=1, max_value=5, value = 1, step = 1)
+number_of_passes = st.slider("Durchlauf Anzahl (empfohlen: 1)", min_value=1, max_value=5, value = 1, step = 1)
 
 # warning for higher number_of_passes
 if number_of_passes > 1:
