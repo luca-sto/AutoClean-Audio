@@ -4,6 +4,66 @@ import librosa
 import soundfile as sf
 import numpy as np
 import tempfile
+from scipy.signal import butter, lfilter
+
+def highpass_filter(data, sr, cutoff=80):
+    nyquist = 0.5 * sr
+    norm_cutoff = cutoff / nyquist
+    b, a = butter(1, norm_cutoff, btype="high", analog=False)
+    return lfilter(b, a, data)
+
+def apply_eq(data, sr):
+    # leichte Höhenanhebung zwischen 3kHz und 6kHz
+    fft_data = np.fft.rfft(data)
+    freqs = np.fft.rfftfreq(len(data), 1/sr)
+    boost_band = (freqs >= 3000) & (freqs <= 6000)
+    fft_data[boost_band] *= 1.2
+    return np.fft.irfft(fft_data)
+
+def normalize_audio(data, target_dBFS=-14):
+    rms = np.sqrt(np.mean(data**2))
+    if rms > 0:
+        scalar = 10**(target_dBFS / 20) / rms
+        return data * scalar
+    return data
+
+def process_audio(y, sr, prop_decrease, num_of_passes, volume_factor):
+    # Stereo-Unterstützung: jeden Kanal einzeln verarbeiten
+    if y.ndim == 1:  # Mono
+        y = [y]
+    else:
+        y = [y[0], y[1]]
+
+    processed_channels = []
+    for channel in y:
+        # Rauschreduzierung
+        reduced = channel.copy()
+        progress_bar = st.progress(0)
+        for i in range(num_of_passes):
+            reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+            progress_bar.progress(int((i+1) / number_of_passes * 100))
+
+        reduced = reduced * volume_factor
+
+
+        # Sprachverbesserung
+        reduced = highpass_filter(reduced, sr)
+        reduced = apply_eq(reduced, sr)
+        reduced = normalize_audio(reduced)
+
+        max_amp = np.max(np.abs(reduced))
+        if max_amp > 1.0:
+            reduced = reduced / max_amp * 0.98
+
+        processed_channels.append(reduced)
+
+    # Wenn Stereo, wieder zusammenfügen
+    if len(processed_channels) == 2:
+        return np.vstack(processed_channels)
+    else:
+        return processed_channels[0]
+
+
 
 # Title of Web-App
 st.title("🎧 AutoClean Audio – Rauschunterdrückung für Audioaufnahmen")
@@ -24,6 +84,9 @@ In einem späteren Update bieten wir zusätzliche **KI-gestützte Filtermethoden
 Gruß
 Luca
 """)
+
+
+
 
 # uploader
 uploaded_file = st.file_uploader(
@@ -87,13 +150,15 @@ if uploaded_file:
             noise_sample = y[0:int(0.33 * len(y))]
 
             # noise reduction with number_of_passes
-            reduced = y.copy()
-            progress_bar = st.progress(0)
-            for i in range(number_of_passes):
-                reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-                progress_bar.progress(int((i+1) / number_of_passes * 100))
+            #reduced = y.copy()
+            #progress_bar = st.progress(0)
+            #for i in range(number_of_passes):
+            #    reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
+            #    progress_bar.progress(int((i+1) / number_of_passes * 100))
 
-            reduced = reduced * volume_factor
+            #reduced = reduced * volume_factor
+
+            reduced = process_audio(y, sr, prop_decrease, number_of_passes, volume_factor)
 
             # safe output
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}").name
