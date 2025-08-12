@@ -1,3 +1,8 @@
+# TODO:
+# Variablennamen konsistent halten
+# extremere Werte-Slider implementieren und testen
+
+
 import streamlit as st
 import noisereduce as nr
 import librosa
@@ -6,33 +11,49 @@ import numpy as np
 import tempfile
 from scipy.signal import butter, lfilter
 
-def highpass_filter(data, sr, cutoff=80):
+# eliminates low-frequent noise (brummen, rumpeln)
+# everything below CUTOFF Hz, will be weakened
+# 120 Hz -> more low-freq. will be weakened, speech will appear thinner
+# 60 Hz -> more bass, speech will kept more volume
+# butterworth-highpass (1. ord will be very soft, higher will be stronger) 
+def highpass_filter(data, sr, cutoff, butterworth_ord):
+    if cutoff == 0:
+        return data
     nyquist = 0.5 * sr
     norm_cutoff = cutoff / nyquist
-    b, a = butter(1, norm_cutoff, btype="high", analog=False)
+    b, a = butter(butterworth_ord, norm_cutoff, btype="high", analog=False)
     return lfilter(b, a, data)
 
-def apply_eq(data, sr):
-    # leichte Höhenanhebung zwischen 3kHz und 6kHz
+# raises speech, makes it brighter and louder
+# 3k-6k: for S,T,K,F
+# 2k-4k: warmer, but not that sharp
+# 4k-8k: more brilliant, but snakey
+# boost-factor: 1 - nothing, 1.1-1.3 - a bit better, 1.5 - unnatural
+# TODO: bell-eq, low-shelf-boost (stimme zu dünn unter 200Hz)
+def apply_eq(data, sr, boost_band_freq, boost_factor):
     fft_data = np.fft.rfft(data)
     freqs = np.fft.rfftfreq(len(data), 1/sr)
-    boost_band = (freqs >= 3000) & (freqs <= 6000)
-    fft_data[boost_band] *= 1.2
+    boost_band = (freqs >= boost_band_freq[0]) & (freqs <= boost_band_freq[1])
+    fft_data[boost_band] *= boost_factor
     return np.fft.irfft(fft_data)
 
-def normalize_audio(data, target_dBFS=-14):
+# targets a specific volume
+# target_dBFS: target in dezibel full scale - -12: louder, -14: streaming, -16: more headroom
+def normalize_audio(data, target_dBFS):
+    # mean rms
     rms = np.sqrt(np.mean(data**2))
     if rms > 0:
+        # scales signal to target
         scalar = 10**(target_dBFS / 20) / rms
         return data * scalar
     return data
 
-def process_audio(y, sr, prop_decrease, num_of_passes, volume_factor):
+def process_audio(y, sr, prop_decrease, num_of_passes, boost_factor, lower_cutoff, butterworth_ord, boost_band_intervall, dBFS_target, noise_sample):
     # Stereo-Unterstützung: jeden Kanal einzeln verarbeiten
     if y.ndim == 1:  # Mono
         y = [y]
     else:
-        y = [y[0], y[1]]
+        y = [y[i] for i in range(y.shape[0])] # Stereo
 
     processed_channels = []
     for channel in y:
@@ -41,15 +62,16 @@ def process_audio(y, sr, prop_decrease, num_of_passes, volume_factor):
         progress_bar = st.progress(0)
         for i in range(num_of_passes):
             reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-            progress_bar.progress(int((i+1) / number_of_passes * 100))
-
-        reduced = reduced * volume_factor
+            progress_bar.progress(int((i+1) / (num_of_passes+3) * 100))
 
 
         # Sprachverbesserung
-        reduced = highpass_filter(reduced, sr)
-        reduced = apply_eq(reduced, sr)
-        reduced = normalize_audio(reduced)
+        reduced = highpass_filter(reduced, sr, lower_cutoff, butterworth_ord)
+        progress_bar.progress(int((num_of_passes+1) / (num_of_passes+3) * 100))
+        reduced = apply_eq(reduced, sr, boost_band_intervall, boost_factor)
+        progress_bar.progress(int((num_of_passes+2) / (num_of_passes+3) * 100))
+        reduced = normalize_audio(reduced, dBFS_target)
+        progress_bar.progress(int((num_of_passes+3) / (num_of_passes+3) * 100))
 
         max_amp = np.max(np.abs(reduced))
         if max_amp > 1.0:
@@ -58,7 +80,7 @@ def process_audio(y, sr, prop_decrease, num_of_passes, volume_factor):
         processed_channels.append(reduced)
 
     # Wenn Stereo, wieder zusammenfügen
-    if len(processed_channels) == 2:
+    if len(processed_channels) > 1:
         return np.vstack(processed_channels)
     else:
         return processed_channels[0]
@@ -111,9 +133,19 @@ elif preset == "(0.7) Balanced":
 elif preset == "(1.0) Strong":
     prop_decrease = 1.0
 
-volume_factor = st.slider ("Output Volume", min_value=0.0, max_value=2.0, value = 1.0, step = 0.05)
-
 number_of_passes = st.slider("Durchlauf Anzahl (empfohlen: 1)", min_value=1, max_value=5, value = 1, step = 1)
+
+lower_cutoff = st.slider("Lower Cutoff to eliminate grumble", min_value = 0.0, max_value = 500.0, value = 80.0, step = 0.5)
+
+butterworth_grade = st.slider("Butterworth-filter-grade", min_value = 0, max_value = 10, value = 1, step = 1)
+
+boost_band_intervall = st.slider("boost_band_intervall", min_value = 0, max_value = 10000, value = (3000, 6000), step = 1)
+
+boost_factor = st.slider("boost-factor in %", min_value = -100, max_value = 100, value = 20) / 100 + 1
+
+dBFS_target = st.slider("dBFS_target", min_value = -40.0, max_value = 0.0, value = -12.0, step = 0.5)
+
+
 
 # warning for higher number_of_passes
 if number_of_passes > 1:
@@ -146,19 +178,10 @@ if uploaded_file:
             # load audio
             y, sr = librosa.load(temp_path, sr=None)
 
-            # nise-profile first 1/3
+            # noise-profile first 1/3
             noise_sample = y[0:int(0.33 * len(y))]
 
-            # noise reduction with number_of_passes
-            #reduced = y.copy()
-            #progress_bar = st.progress(0)
-            #for i in range(number_of_passes):
-            #    reduced = nr.reduce_noise(y=reduced, sr=sr, y_noise=noise_sample, prop_decrease=prop_decrease)
-            #    progress_bar.progress(int((i+1) / number_of_passes * 100))
-
-            #reduced = reduced * volume_factor
-
-            reduced = process_audio(y, sr, prop_decrease, number_of_passes, volume_factor)
+            reduced = process_audio(y, sr, prop_decrease, number_of_passes, boost_factor, lower_cutoff, butterworth_grade, boost_band_intervall, dBFS_target, noise_sample)
 
             # safe output
             output_path = tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}").name
